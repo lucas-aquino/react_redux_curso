@@ -1,34 +1,47 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useDispatch, useSelector } from 'react-redux'
+
+//MALA PRACTICA
+export const reducer = (state = 0, action) => {
+
+  if (action.type === 'incrementar') {
+    return (state + 1)
+  }
+
+  if (action.type === 'decrementar') {
+    return (state - 1)
+  }
+
+  if (action.type === 'set') {
+    return action.payload
+  }
+
+  return state
+}
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const [ valor, setValor ] = useState('')
+  const dispatch = useDispatch()
+  const state = useSelector(state => state)
+  const set = () => {
+    dispatch({ type: 'set', payload: valor })
+    setValor('')
+  }
   return (
-    <>
+    <div>
+      <p>Contador: { state }</p>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <input 
+          type='text' 
+          value={ valor } 
+          onChange={ e => setValor(Number(e.target.value)) }/>
+        <button onClick={ set }>💾</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <div>
+        <button onClick={() => dispatch({ type: 'incrementar' })}>➕</button>
+        <button onClick={() => dispatch({ type: 'decrementar' })}>➖</button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
