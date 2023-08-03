@@ -1,22 +1,9 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import TodoItem from './components/TodoItem'
-
-const initialState = {
-  entities: [],
-}
-
-export const reducer = (state = initialState, action) => {
-
-  if (action.type === 'todo/add') {
-    return {
-      ...state,
-      entities: state.entities.concat({ ...action.payload }) 
-    }
-  }
-
-  return state
-}
+import { setFilter } from './features/actionSetters'
+import { fetchThunk } from './features/fetch'
+import { statusSelector, todoSelector } from './features/selectors'
 
 function App() {
 
@@ -24,7 +11,9 @@ function App() {
 
   const dispatch = useDispatch()
 
-  const state = useSelector(x => x)
+  const todos = useSelector(todoSelector)
+
+  const status = useSelector(statusSelector)
 
   const submit = e => {
     e.preventDefault()
@@ -49,20 +38,32 @@ function App() {
     setValue('')
   }
 
+  if (status.loading === 'pending') {
+    return (
+      <div>cargando ...</div>
+    )
+  }
+
+  if (status.loading === 'rejected') {
+    return (
+      <div>{ status.error }</div>
+    )
+  }
+
+
   return (
     <div>
-      <form>
-        <input value={value} onChange={e => setValue(e.target.value)}/>
+      <form onSubmit={ submit }>
+        <input value={ value } onChange={ e => setValue(e.target.value) }/>
       </form>
-      <button>mostrar todos</button>
-      <button>completos</button>
-      <button>incompletos</button>
+      <button onClick={() => dispatch(setFilter('all'))}>mostrar todos</button>
+      <button onClick={() => dispatch(setFilter('complete'))}>completos</button>
+      <button onClick={() => dispatch(setFilter('incomplete'))}>incompletos</button>
+      <button onClick={() => dispatch(fetchThunk())}>fetchThunk</button>
       <ul>
         {
-          state.entities.map(todo => 
-          <TodoItem key={todo.id} todo={todo}>
-            
-          </TodoItem>)
+          todos.map(todo => 
+          <TodoItem key={ todo.id } todo={ todo }></TodoItem>)
         }
       </ul>
     </div>
